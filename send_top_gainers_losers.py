@@ -7,7 +7,7 @@ from discord_worker import run_discord_bot
 
 async def make_schedule():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(send_daily_stats, 'interval', minutes=1)
+    scheduler.add_job(send_daily_stats, 'cron', hours=22)
     scheduler.start()
 
 
