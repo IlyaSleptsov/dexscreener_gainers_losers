@@ -7,7 +7,7 @@ The main file that starts workers:
 - schedules Telegram messages
 - launches Discord bot that processes _/get_daily_stats_ command
 
-We can easily add there more tasks (in asyncio loop) or scheduled jobs (in AsyncIOScheduler).
+We can easily add more tasks (in asyncio loop) or scheduled jobs (in AsyncIOScheduler).
 ### dexscreener.py
 
 A number of functions responsible for data parsing and formatting:
@@ -18,16 +18,18 @@ A number of functions responsible for data parsing and formatting:
 **Important point:** 
 DexScreener utilizes socket API and doesn't introduce any data protection measures, 
 so I use hard-coded headers and don't paste in request 
-my secret key from web-interface (it is automatically generated and there is no need in it).
+my secret key from the web-interface (it is automatically generated, and there is no need for it).
 
 ### telegram_worker.py
-Two functions: to send Telegram messages and to ask data from dexscreener.py and send message. 
+Two functions: 
+- to send Telegram messages
+- to ask for data from dexscreener.py and trigger send messages function 
 
 ### discord_worker.py
-_run_discord_bot()_ function to launch bot that is called from send_top_gainers_losers.py 
+_run_discord_bot()_ function to launch a bot that is called from send_top_gainers_losers.py 
 file and a decorator that processes _/get_daily_stats_ command.
 
 ## Possible improvements
-1. We definitely need to add links in our stats message because you read it and want to tap. I found out a way how to generate a link and paste it in the text, can add in near time.
-2. I don't see problems for now but we can add more processing of corner cases that can potentially arise.
-3. I believe (if we find this useful) we can extract more insights from this data taking into account lower time periods (like, highlighting hot coins on 1 hour timeframe).
+1. We definitely need to add links in our stats message because you read it and want to tap it. I found a way to generate a link and paste it into the text, can add in near time.
+2. I don't see problems for now, but we can add more processing of corner cases that can potentially arise.
+3. I believe (if we find this useful) we can extract more insights from this data, considering lower periods (like highlighting hot coins in a 1-hour timeframe).
