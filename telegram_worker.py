@@ -10,7 +10,7 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 async def send_telegram_message(data):
     bot = telegram.Bot(token=TELEGRAM_KEY)
-    await bot.send_message(chat_id=CHAT_ID, text=data)
+    await bot.send_message(chat_id=CHAT_ID, text=data, parse_mode='html', disable_web_page_preview=True)
 
 
 async def send_daily_stats():

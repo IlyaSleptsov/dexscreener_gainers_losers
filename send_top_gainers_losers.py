@@ -7,7 +7,7 @@ from discord_worker import run_discord_bot
 
 async def make_schedule():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(send_daily_stats, 'cron', hours=22)
+    scheduler.add_job(send_daily_stats, 'cron', hours="22")
     scheduler.start()
 
 
@@ -23,8 +23,8 @@ if __name__ == '__main__':
                         datefmt='%Y.%m.%d %H:%M:%S',
                         filename='send_top_gainers_losers_logs',
                         filemode='a',
-                        level=logging.WARNING)
+                        level=logging.INFO)
     try:
         main()
     except Exception as e:
-        print(e)
+        logging.exception(e)

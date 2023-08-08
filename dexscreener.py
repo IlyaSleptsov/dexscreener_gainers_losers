@@ -25,31 +25,53 @@ dexscreener_headers = {
 
 
 def format_number(number):
-    number = str(number)
-    return " ".join([number[::-1][i:i + 3] for i in range(0, len(number), 3)])[::-1]
+    if number >= 10000000:
+        if number % 10000000 == 0:
+            return '{}B'.format(round(number / 10000000))
+        else:
+            return '{}B'.format(round(number / 10000000, 1))
+    elif number >= 1000000:
+        if number % 1000000 == 0:
+            return '{}M'.format(round(number / 1000000))
+        else:
+            return '{}M'.format(round(number / 1000000, 1))
+    else:
+        return '{}K'.format(round(number / 1000))
 
 
-def format_data_into_message(gainers_data, losers_data, limit):
+def create_link_for_pair(chain, pair_contract, baseToken, quoteToken, discord=False):
+    created_link = 'https://dexscreener.com/{}/{}'.format(chain, pair_contract)
+    connected_pair = baseToken + '/' + quoteToken
+    if discord:
+        pair_with_html = '[{}]({})'.format(connected_pair, created_link)
+    else:
+        pair_with_html = "<a href='{}'>{}</a>".format(created_link, connected_pair)
+    return pair_with_html
+
+
+def format_data_into_message(gainers_data, losers_data, limit, discord):
     data_gainers = '\n🟢 Daily gainers 🟢'
     data_losers = '\n\n🔴 Daily losers 🔴'
 
     general_stats = "📊 Daily stats\nTransactions: {}\nVolume: ${}\n".format(
         format_number(gainers_data['stats']['h24']['txns']),
         format_number(round(gainers_data['stats']['h24']['volumeUsd'])))
+
     for pair, position in zip(gainers_data['pairs'][0:limit], range(limit)):
-        data_gainers += '\n{}. {}/{} +{}% (Market Cap: ${})'.format(position + 1,
-                                                                    pair['baseToken']['symbol'],
-                                                                    pair['quoteToken']['symbol'],
-                                                                    format_number(round(pair['priceChange']['h24'])),
-                                                                    format_number(pair['marketCap']))
+        pair_with_link = create_link_for_pair(pair['chainId'], pair['pairAddress'], pair['baseToken']['symbol'],
+                                              pair['quoteToken']['symbol'], discord)
+        data_gainers += '\n{}. {} +{}% (Market Cap: ${})'.format(position + 1,
+                                                                 pair_with_link,
+                                                                 format_number(round(pair['priceChange']['h24'])),
+                                                                 format_number(pair['marketCap']))
 
     for pair, position in zip(losers_data['pairs'][0:limit], range(10)):
-        data_losers += '\n{}. {}/{} {}% (Market Cap: ${})'.format(position + 1,
-                                                                  pair['baseToken']['symbol'],
-                                                                  pair['quoteToken']['symbol'],
-                                                                  format_number(round(pair['priceChange']['h24'])),
-                                                                  format_number(pair['marketCap']))
-
+        pair_with_link = create_link_for_pair(pair['chainId'], pair['pairAddress'], pair['baseToken']['symbol'],
+                                              pair['quoteToken']['symbol'], discord)
+        data_losers += '\n{}. {} {}% (Market Cap: ${})'.format(position + 1,
+                                                               pair_with_link,
+                                                               format_number(round(pair['priceChange']['h24'])),
+                                                               format_number(pair['marketCap']))
     return general_stats + data_gainers + data_losers
 
 
@@ -70,8 +92,8 @@ async def get_data(uri):
     return data
 
 
-async def get_message_from_dexscreener():
+async def get_message_from_dexscreener(discord=False):
     gainers_data = await get_data(URI.format('desc'))
     losers_data = await get_data(URI.format('asc'))
-    message = format_data_into_message(gainers_data, losers_data, 10)
+    message = format_data_into_message(gainers_data, losers_data, 10, discord)
     return message
